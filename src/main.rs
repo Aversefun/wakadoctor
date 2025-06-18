@@ -227,11 +227,16 @@ async fn main() {
         }
     }
 
+
     if args.offline {
         println!("⚠️ - Not attempting to perform online heartbeat check (--offline passed)")
     } else {
         match reqwest::Client::new()
-                    .post(url.join("users/current/heartbeats").unwrap())
+                    .post(if url.as_str().ends_with("/") {
+                        url.as_str().to_string() + "users/current/heartbeats"
+                    } else {
+                        url.as_str().to_string() + "/users/current/heartbeats"
+                    })
                     .bearer_auth(config.settings.api_key)
                     .body(format!(
                         "[{{\"type\":\"file\",\"time\":{},\"entity\":\"wakadoctor-test.txt\",\"language\":\"Text\"}}]",
@@ -241,8 +246,15 @@ async fn main() {
                     .timeout(std::time::Duration::from_secs(10))
                     .send()
                     .await {
-            Ok(_) => {
-                println!("✅ - Got successful status code! {host} is configured correctly.")
+            Ok(r) => {
+                if r.status().is_success() {
+                    println!("✅ - Got successful status code({})! {host} is configured correctly.", r.status());
+                } else {
+                    println!(
+                        "❌ - Got error status code ({}). {host} is NOT configured correctly.",
+                        r.status()
+                    );
+                }
             },
             Err(e) => {
                 if e.is_timeout() {
