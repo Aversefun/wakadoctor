@@ -179,6 +179,24 @@ async fn main() {
         WakaHost::Custom => {}
     }
 
+    if url.scheme() != "https" {
+        if url.scheme() == "http" {
+            println!(
+                "❌ - Wakatime API URL is unsecured HTTP"
+            );
+        } else {
+            println!(
+                "❌ - Wakatime API URL has unknown scheme \"{}\"",
+                url.scheme()
+            );
+        }
+        return;
+    } else {
+        println!(
+            "✅ - Wakatime API URL is HTTPS"
+        );
+    }
+
     if config.settings.api_key.is_empty() {
         println!("❌ - No API key in file");
         return;
