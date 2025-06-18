@@ -1,0 +1,6 @@
+[package]
+name = "wakadoctor"
+version = "1.0.0-devel"
+edition = "2024"
+
+[dependencies]
